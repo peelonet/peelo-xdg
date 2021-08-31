@@ -11,9 +11,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       name: Checkout
-    - name: Build
+    - name: Build & Test
       uses: ashutoshvarma/action-cmake-build@master
       with:
         build-dir: ${{ runner.workspace }}/build
         build-type: Release
+        configure-options: -DCMAKE_CXX_FLAGS="-std=c++17"
         run-test: true
