@@ -29,11 +29,11 @@ Directory for user-specific non-essential runtime files and other file objects
 
 All directories for user-specific data files in users preferred order.
 
-## xdg::all_config_dirs() -> [vector]\<[filesystem::path]\>
+## peelo::xdg::all_config_dirs() -> [vector]\<[filesystem::path]\>
 
 All directories for user-specific configuration files in users preferred order.
 
-## xdg::home_dir() -> [optional]\<[filesystem::path]\>
+## peelo::xdg::home_dir() -> [optional]\<[filesystem::path]\>
 
 Users home directory.
 

@@ -28,6 +28,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 #if !defined(_WIN32)
