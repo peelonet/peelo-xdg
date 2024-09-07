@@ -11,7 +11,8 @@ using std::optional;
 
 using callback_type = std::function<std::optional<std::filesystem::path>()>;
 
-static void test_with_env_variable(
+static void
+test_with_env_variable(
   const callback_type& callback,
   const char* env_variable_name
 )
@@ -24,7 +25,8 @@ static void test_with_env_variable(
   assert(*result == path("xdg") / "test");
 }
 
-static void test_without_env_variable(
+static void
+test_without_env_variable(
   const callback_type& callback,
   const char* env_variable_name,
   const optional<path>& expected_result
@@ -44,7 +46,8 @@ static void test_without_env_variable(
   }
 }
 
-static void test_callback(
+static void
+test_callback(
   const callback_type& callback,
   const char* env_variable_name,
   const optional<path>& expected_result_without_env_var = nullopt
@@ -58,16 +61,34 @@ static void test_callback(
   );
 }
 
-int main()
+int
+main()
 {
-  const path base = "xdg";
   using namespace peelo::xdg;
+  const path base = "xdg";
 
-  test_callback(data_dir, "XDG_DATA_HOME", base / ".local" / "share");
-  test_callback(config_dir, "XDG_CONFIG_HOME", base / ".config");
-  test_callback(state_dir, "XDG_STATE_HOME", base / ".local" / "state");
-  test_callback(cache_dir, "XDG_CACHE_HOME", base / ".cache");
-  test_callback(runtime_dir, "XDG_RUNTIME_DIR");
-
-  return EXIT_SUCCESS;
+  test_callback(
+    data_dir<std::filesystem::path>,
+    "XDG_DATA_HOME",
+    base / ".local" / "share"
+  );
+  test_callback(
+    config_dir<std::filesystem::path>,
+    "XDG_CONFIG_HOME",
+    base / ".config"
+  );
+  test_callback(
+    state_dir<std::filesystem::path>,
+    "XDG_STATE_HOME",
+    base / ".local" / "state"
+  );
+  test_callback(
+    cache_dir<std::filesystem::path>,
+    "XDG_CACHE_HOME",
+    base / ".cache"
+  );
+  test_callback(
+    runtime_dir<std::filesystem::path>,
+    "XDG_RUNTIME_DIR"
+  );
 }

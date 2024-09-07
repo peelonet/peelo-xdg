@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, peelo.net
+ * Copyright (c) 2021-2024, peelo.net
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,31 +40,37 @@ namespace peelo::xdg
 {
   namespace internal
   {
-    inline std::vector<std::filesystem::path>
+#if defined(_WIN32)
+    static constexpr char path_separator = ';';
+#else
+    static constexpr char path_separator = ':';
+#endif
+
+    template<class T = std::filesystem::path>
+    std::vector<T>
     get_multiple_dirs(const char* env_variable_name)
     {
-#if defined(_WIN32)
-      static const char separator = ';';
-#else
-      static const char separator = ':';
-#endif
-      std::vector<std::filesystem::path> result;
+      std::vector<T> result;
 
-      if (const auto env_variable = std::getenv(env_variable_name))
+      if (auto begin = std::getenv(env_variable_name))
       {
-        const std::string s = env_variable;
-        std::string::size_type start = 0;
-        std::string::size_type end = s.find(separator);
+        auto end = begin;
 
-        while (end != std::string::npos)
+        for (; *end; ++end)
         {
-          result.push_back(s.substr(start, end - start));
-          start = end + 1;
-          end = s.find(separator, start);
+          if (*end != path_separator)
+          {
+            continue;
+          }
+          else if (end - begin > 0)
+          {
+            result.emplace_back(std::string(begin, end - begin));
+          }
+          begin = end + 1;
         }
-        if (end - start > 0)
+        if (end - begin > 0)
         {
-          result.push_back(s.substr(start, end - start));
+          result.emplace_back(std::string(begin, end - begin));
         }
       }
 
@@ -75,7 +81,8 @@ namespace peelo::xdg
   /**
    * Returns path to users home directory, if it can be determined.
    */
-  inline std::optional<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::optional<T>
   home_dir()
   {
     const auto home = std::getenv("HOME");
@@ -115,7 +122,8 @@ namespace peelo::xdg
   /**
    * Returns path to XDG data directory, if it can be determined.
    */
-  inline std::optional<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::optional<T>
   data_dir()
   {
     if (const auto env_variable = std::getenv("XDG_DATA_HOME"))
@@ -134,7 +142,8 @@ namespace peelo::xdg
    * Returns all XDG data directories in users preferred order, or empty vector
    * if they cannot be determined.
    */
-  inline std::vector<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::vector<T>
   all_data_dirs()
   {
     auto result = internal::get_multiple_dirs("XDG_DATA_DIRS");
@@ -142,8 +151,8 @@ namespace peelo::xdg
 #if !defined(_WIN32)
     if (result.empty())
     {
-      result.push_back("/usr/local/share");
-      result.push_back("/usr/share");
+      result.emplace_back("/usr/local/share");
+      result.emplace_back("/usr/share");
     }
 #endif
 
@@ -153,7 +162,8 @@ namespace peelo::xdg
   /**
    * Returns path to XDG configuration directory, if it can be determined.
    */
-  inline std::optional<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::optional<T>
   config_dir()
   {
     if (const auto env_variable = std::getenv("XDG_CONFIG_HOME"))
@@ -172,7 +182,8 @@ namespace peelo::xdg
    * Returns all XDG configuration directories in users preferred order, or
    * empty vector if they cannot be determined.
    */
-  inline std::vector<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::vector<T>
   all_config_dirs()
   {
     auto result = internal::get_multiple_dirs("XDG_CONFIG_DIRS");
@@ -180,7 +191,7 @@ namespace peelo::xdg
 #if !defined(_WIN32)
     if (result.empty())
     {
-      result.push_back("/etc/xdg");
+      result.emplace_back("/etc/xdg");
     }
 #endif
 
@@ -190,7 +201,8 @@ namespace peelo::xdg
   /**
    * Returns path to XDG state directory, if it can be determined.
    */
-  inline std::optional<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::optional<T>
   state_dir()
   {
     if (const auto env_variable = std::getenv("XDG_STATE_HOME"))
@@ -208,7 +220,8 @@ namespace peelo::xdg
   /**
    * Returns path to XDG cache directory, if it can be determined.
    */
-  inline std::optional<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::optional<T>
   cache_dir()
   {
     if (const auto env_variable = std::getenv("XDG_CACHE_HOME"))
@@ -226,7 +239,8 @@ namespace peelo::xdg
   /**
    * Returns path to XDG runtime directory, if it can be determined.
    */
-  inline std::optional<std::filesystem::path>
+  template<class T = std::filesystem::path>
+  std::optional<T>
   runtime_dir()
   {
     if (const auto env_variable = std::getenv("XDG_RUNTIME_DIR"))
