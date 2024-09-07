@@ -16,5 +16,4 @@ jobs:
         with:
           build-dir: ${{ runner.workspace }}/build
           build-type: Release
-          configure-options: -DCMAKE_CXX_FLAGS="-std=c++17"
           run-test: true
