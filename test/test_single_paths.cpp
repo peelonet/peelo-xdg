@@ -74,6 +74,27 @@ test_callback(
   );
 }
 
+#if defined(_WIN32)
+static void
+test_home_dir_with_userprofile()
+{
+  _putenv("HOME=");
+  _putenv("USERPROFILE=C:\\test");
+
+  assert(peelo::xdg::home_dir() == path("C:\\test"));
+}
+
+static void
+test_home_dir_with_home_drive_and_path()
+{
+  _putenv("HOME=");
+  _putenv("HOMEDRIVE=C:\\");
+  _putenv("HOMEPATH=test");
+
+  assert(peelo::xdg::home_dir() == path("C:\\test"));
+}
+#endif
+
 int
 main()
 {
@@ -104,4 +125,8 @@ main()
     runtime_dir<std::filesystem::path>,
     "XDG_RUNTIME_DIR"
   );
+#if defined(_WIN32)
+  test_home_dir_with_userprofile();
+  test_home_dir_with_home_drive_and_path();
+#endif
 }
