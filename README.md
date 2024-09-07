@@ -4,6 +4,8 @@
 
 [C++17] header only alternative to [libxdg-basedir] library.
 
+[Doxygen generated API documentation](https://peelonet.github.io/peelo-xdg/)
+
 ## peelo::xdg::data_dir() -> [optional]\<[filesystem::path]\>
 
 Directory for user-specific data files.
