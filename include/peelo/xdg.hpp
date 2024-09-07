@@ -99,7 +99,7 @@ namespace peelo::xdg
 
         if (homedrive && *homedrive && homepath && *homepath)
         {
-          return std::filesystem::path(homedrive) / homepath;
+          return T(homedrive) / homepath;
         }
       } else {
         return userprofile;
