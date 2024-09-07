@@ -88,7 +88,8 @@ static void
 test_home_dir_with_home_drive_and_path()
 {
   _putenv("HOME=");
-  _putenv("HOMEDRIVE=C:\\");
+  _putenv("USERPROFILE=");
+  _putenv("HOMEDRIVE=C:");
   _putenv("HOMEPATH=test");
 
   assert(peelo::xdg::home_dir() == path("C:\\test"));

@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 PROJECT(
   PeeloXdg
-  VERSION 0.1.0
+  VERSION 0.2.2
   DESCRIPTION "C++17 replacement for libxdg-basedir"
   HOMEPAGE_URL "https://github.com/peelonet/peelo-xdg"
   LANGUAGES CXX
