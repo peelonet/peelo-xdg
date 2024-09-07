@@ -3,6 +3,10 @@
 #include <cstring>
 #include <functional>
 
+#if defined(_WIN32)
+# include <windows.h>
+#endif
+
 #include <peelo/xdg.hpp>
 
 using std::filesystem::path;
@@ -14,10 +18,14 @@ using callback_type = std::function<std::optional<std::filesystem::path>()>;
 static void
 test_with_env_variable(
   const callback_type& callback,
-  const char* env_variable_name
+  const std::string& env_variable_name
 )
 {
-  setenv(env_variable_name, "xdg/test", 1);
+#if defined(_WIN32)
+  _putenv((env_variable_name + "=" + "xdg\\test").c_str());
+#else
+  setenv(env_variable_name.c_str(), "xdg/test", 1);
+#endif
 
   const auto result = callback();
 
@@ -28,12 +36,17 @@ test_with_env_variable(
 static void
 test_without_env_variable(
   const callback_type& callback,
-  const char* env_variable_name,
+  const std::string& env_variable_name,
   const optional<path>& expected_result
 )
 {
-  unsetenv(env_variable_name);
+#if defined(_WIN32)
+  _putenv((env_variable_name + "=").c_str());
+  _putenv("HOME=xdg");
+#else
+  unsetenv(env_variable_name.c_str());
   setenv("HOME", "xdg", 1);
+#endif
 
   const auto result = callback();
 
@@ -49,7 +62,7 @@ test_without_env_variable(
 static void
 test_callback(
   const callback_type& callback,
-  const char* env_variable_name,
+  const std::string& env_variable_name,
   const optional<path>& expected_result_without_env_var = nullopt
 )
 {

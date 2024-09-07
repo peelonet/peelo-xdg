@@ -2,6 +2,10 @@
 #include <cstdlib>
 #include <functional>
 
+#if defined(_WIN32)
+# include <windows.h>
+#endif
+
 #include <peelo/xdg.hpp>
 
 using callback_type = std::function<std::vector<std::filesystem::path>()>;
@@ -9,22 +13,18 @@ using callback_type = std::function<std::vector<std::filesystem::path>()>;
 static void
 test_callback(
   const callback_type& callback,
-  const char* env_variable_name
+  const std::string& env_variable_name
 )
 {
   using peelo::xdg::internal::path_separator;
+  const auto value = std::string("/xdg") + path_separator + path_separator + "/xdg/xdg";
 
-  unsetenv(env_variable_name);
-  setenv(
-    env_variable_name,
-    (
-      std::string("/xdg") +
-      path_separator +
-      path_separator +
-      "/xdg/xdg"
-    ).c_str(),
-    1
-  );
+#if defined(_WIN32)
+  _putenv((env_variable_name + "=" + value).c_str());
+#else
+  unsetenv(env_variable_name.c_str());
+  setenv(env_variable_name.c_str(), value.c_str(), 1);
+#endif
 
   const auto result = callback();
 
