@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, peelo.net
+ * Copyright (c) 2021-2025, peelo.net
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

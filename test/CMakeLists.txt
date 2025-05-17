@@ -1,26 +1,26 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}../include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}../include)
 
-FILE(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-FOREACH(TEST_FILENAME ${TEST_SOURCES})
-  GET_FILENAME_COMPONENT(TEST_NAME ${TEST_FILENAME} NAME_WE)
-  ADD_EXECUTABLE(${TEST_NAME} ${TEST_FILENAME})
+file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+foreach(TEST_FILENAME ${TEST_SOURCES})
+  get_filename_component(TEST_NAME ${TEST_FILENAME} NAME_WE)
+  add_executable(${TEST_NAME} ${TEST_FILENAME})
 
-  TARGET_INCLUDE_DIRECTORIES(
+  target_include_directories(
     ${TEST_NAME}
     PUBLIC
       ${CMAKE_CURRENT_SOURCE_DIR}/../include
   )
 
-  TARGET_COMPILE_FEATURES(
+  target_compile_features(
     ${TEST_NAME}
     PUBLIC
       cxx_std_17
   )
 
-  TARGET_LINK_LIBRARIES(
+  target_link_libraries(
     ${TEST_NAME}
     PeeloXdg
   )
 
-  ADD_TEST(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-ENDFOREACH()
+  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
