@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <optional>
+#include <string>
 #include <vector>
 
 #if !defined(_WIN32)
@@ -46,18 +47,40 @@ namespace peelo::xdg
     static constexpr char path_separator = ':';
 #endif
 
-    inline const char*
-    getenv(const char* name)
+    inline std::optional<std::string>
+    getenv_string(const char* name)
     {
-#if defined(_MSC_VER)
-# pragma warning(push)
-# pragma warning(disable: 4996)
-#endif
+#if defined(_WIN32)
+      char* value = nullptr;
+      std::size_t length = 0;
+
+      if (::_dupenv_s(&value, &length, name) != 0)
+      {
+        return std::nullopt;
+      }
+
+      if (!value || !*value)
+      {
+        std::free(value);
+
+        return std::nullopt;
+      }
+
+      std::string result{value};
+
+      std::free(value);
+
+      return result;
+#else
       const auto value = std::getenv(name);
-#if defined(_MSC_VER)
-# pragma warning(pop)
+
+      if (!value || !*value)
+      {
+        return std::nullopt;
+      }
+
+      return std::string{value};
 #endif
-      return value;
     }
 
     template<class T = std::filesystem::path>
@@ -65,10 +88,11 @@ namespace peelo::xdg
     get_multiple_dirs(const char* env_variable_name)
     {
       std::vector<T> result;
-      auto begin = getenv(env_variable_name);
+      const auto env_value = getenv_string(env_variable_name);
 
-      if (begin && *begin)
+      if (env_value)
       {
+        auto begin = env_value->c_str();
         auto end = begin;
 
         for (; *end; ++end)
@@ -100,38 +124,34 @@ namespace peelo::xdg
   std::optional<T>
   home_dir()
   {
-    const auto home = internal::getenv("HOME");
-
-    if (!home || !*home)
+    if (const auto home = internal::getenv_string("HOME"))
     {
-#if defined(_WIN32)
-      const auto userprofile = internal::getenv("USERPROFILE");
-
-      if (!userprofile || !*userprofile)
-      {
-        const auto homedrive = internal::getenv("HOMEDRIVE");
-        const auto homepath = internal::getenv("HOMEPATH");
-
-        if (homedrive && *homedrive && homepath && *homepath)
-        {
-          return T(homedrive) / homepath;
-        }
-      } else {
-        return userprofile;
-      }
-#else
-      const auto pw = ::getpwuid(::getuid());
-
-      if (pw)
-      {
-        return pw->pw_dir;
-      }
-#endif
-
-      return std::nullopt;
+      return *home;
     }
 
-    return home;
+#if defined(_WIN32)
+    if (const auto userprofile = internal::getenv_string("USERPROFILE"))
+    {
+      return *userprofile;
+    }
+
+    const auto homedrive = internal::getenv_string("HOMEDRIVE");
+    const auto homepath = internal::getenv_string("HOMEPATH");
+
+    if (homedrive && homepath)
+    {
+      return T(*homedrive) / *homepath;
+    }
+#else
+    const auto pw = ::getpwuid(::getuid());
+
+    if (pw)
+    {
+      return pw->pw_dir;
+    }
+#endif
+
+    return std::nullopt;
   }
 
   /**
@@ -141,11 +161,9 @@ namespace peelo::xdg
   std::optional<T>
   data_dir()
   {
-    const auto env_variable = internal::getenv("XDG_DATA_HOME");
-
-    if (env_variable && *env_variable)
+    if (const auto env_variable = internal::getenv_string("XDG_DATA_HOME"))
     {
-      return env_variable;
+      return *env_variable;
     }
     else if (const auto home = home_dir())
     {
@@ -183,11 +201,9 @@ namespace peelo::xdg
   std::optional<T>
   config_dir()
   {
-    const auto env_variable = internal::getenv("XDG_CONFIG_HOME");
-
-    if (env_variable && *env_variable)
+    if (const auto env_variable = internal::getenv_string("XDG_CONFIG_HOME"))
     {
-      return env_variable;
+      return *env_variable;
     }
     else if (const auto home = home_dir())
     {
@@ -224,11 +240,9 @@ namespace peelo::xdg
   std::optional<T>
   state_dir()
   {
-    const auto env_variable = internal::getenv("XDG_STATE_HOME");
-
-    if (env_variable && *env_variable)
+    if (const auto env_variable = internal::getenv_string("XDG_STATE_HOME"))
     {
-      return env_variable;
+      return *env_variable;
     }
     else if (const auto home = home_dir())
     {
@@ -245,11 +259,9 @@ namespace peelo::xdg
   std::optional<T>
   cache_dir()
   {
-    const auto env_variable = internal::getenv("XDG_CACHE_HOME");
-
-    if (env_variable && *env_variable)
+    if (const auto env_variable = internal::getenv_string("XDG_CACHE_HOME"))
     {
-      return env_variable;
+      return *env_variable;
     }
     else if (const auto home = home_dir())
     {
@@ -266,11 +278,9 @@ namespace peelo::xdg
   std::optional<T>
   runtime_dir()
   {
-    const auto env_variable = internal::getenv("XDG_RUNTIME_DIR");
-
-    if (env_variable && *env_variable)
+    if (const auto env_variable = internal::getenv_string("XDG_RUNTIME_DIR"))
     {
-      return env_variable;
+      return *env_variable;
     }
 
     return std::nullopt;
