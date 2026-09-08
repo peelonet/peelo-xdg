@@ -50,7 +50,7 @@ namespace peelo::xdg
     inline std::optional<std::string>
     getenv_string(const char* name)
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
       char* value = nullptr;
       std::size_t length = 0;
 
